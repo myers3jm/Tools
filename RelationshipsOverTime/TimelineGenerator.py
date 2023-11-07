@@ -46,8 +46,7 @@ def main():
         "Iu'saralymon",
         "Vilianaryst",
         "Lemfrodys",
-        "Gorros",
-        "Feus"
+        "Gorros"
     ]
 
     entities = []
@@ -66,14 +65,17 @@ def main():
         for entity in entities:
             entity.relationships.clear()
 
+    outfile = open('RelationshipsTimeline.md', 'w', encoding='utf-8')
+
     for year, relationSet in enumerate(timeline):
-        print(f'Year {year * 100}')
-        print()
+        outfile.write(f'# Year {(year + 1 ) * 100}')
+        outfile.write('\n')
         for entity in relationSet:
-            print(entity)
+            outfile.write(f'## {entity}\n')
             for relatedEntity in entity.relationships:
-                print(f'\t{relatedEntity}')
-            print()
-        print()
+                outfile.write(f'{relatedEntity}\n')
+                outfile.write('\n')
+            outfile.write('\n')
+        outfile.write('\n')
 
 main()
