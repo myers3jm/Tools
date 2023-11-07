@@ -1,27 +1,5 @@
 import random
-
-def loyaltiesAtTime(families):
-    loyalties = {}
-    
-    edges = []
-
-    for family in families:
-        addEdge = 1
-        while addEdge == 1:
-            connectedFamily = family
-            while connectedFamily == family:
-                connectedFamily = families[random.randrange(0, len(families))]
-            edges.append([family, connectedFamily])
-            addEdge = random.randrange(0, 1)
-
-    for family in families:
-        loyalFamilies = []
-        for edge in edges:
-            if family in edge:
-                loyalFamilies.append([x for x in edge if family != x][0])
-        loyalties[family] = loyalFamilies
-
-    return loyalties
+import copy
 
 class Entity:
     def __init__(self, name):
@@ -39,12 +17,15 @@ class Entity:
 
 def mapRelationships(entities):
     for entity in entities:
-        for i in range(random.randrange(0, len(entities) // 8)):
+        if random.randint(0, 1) == 1:
+            continue
+        for i in range(random.randint(0, 5)):
             connectedEntity = entity
             while connectedEntity == entity:
                 connectedEntity = entities[random.randrange(0, len(entities))]
             if connectedEntity not in entity.relationships:
                 entity.append(connectedEntity)    
+                connectedEntity.append(entity)
             
 def main():
     entityNames = [
@@ -81,7 +62,9 @@ def main():
         mapRelationships(entities)
         for entity in entities:
             currentRelationships.append(entity)
-        timeline.append(currentRelationships)
+        timeline.append(copy.deepcopy(currentRelationships))
+        for entity in entities:
+            entity.relationships.clear()
 
     for year, relationSet in enumerate(timeline):
         print(f'Year {year * 100}')
