@@ -8,7 +8,7 @@ if __name__ == '__main__':
     if len(args) < 1:
         print("Missing argument 'input file'")
         sys.exit()
-    filename = args[0]
+    filename = args[1]
     if len(filename) == 0: sys.exit()
 
     data = []
@@ -17,7 +17,7 @@ if __name__ == '__main__':
         abbrvs = sorted(set([x[2][:x[2].rfind(':')] for x in data]))
 
     wordset = set()
-    with open(filename, 'r') as file:
+    with open(filename, 'r', encoding='utf8') as file:
         words = [x.translate(str.maketrans('', '', string.punctuation)).lower().strip() + '\n' for x in re.split('\W+', file.read()) if len(x.translate(str.maketrans('', '', string.punctuation)).lower().strip()) > 0]
         wordset = sorted(set([x for x in words if len(x.strip()) > 0]))
 
