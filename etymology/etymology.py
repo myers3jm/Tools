@@ -4,28 +4,32 @@ import re
 import math
 
 class Report:
-    def __init__(self, distribution: dict, wordset: list, wordcounts: dict, iso639_3_mappings: dict):
+    def __init__(self, filename: str, distribution: dict, wordset: list, wordcounts: dict, iso639_3_mappings: dict):
         self.wordset = wordset
         self.distribution = distribution
         self.wordcounts = wordcounts
         self.iso639_3_mappings = iso639_3_mappings
 
     def __repr__(self) -> str:
-        ret = ''
+        ret = f'# Etymology Report for {filename}\n'
+
+        ret += '## Distribution Summary\n'
 
         for key in sorted(distribution.keys(), key=lambda k: len(distribution[k]), reverse=True):
             value = distribution[key]
             if len(value) > 0:
-                ret += f'{iso639_3_mappings[key]}: {round(100 * (len(value) / len(wordset)), 2)}%\n'
+                ret += f'### {iso639_3_mappings[key]}: {round(100 * (len(value) / self.getDistinctCount()), 2)}%\n'
 
-        ret += f'\n{"#" * 40}\n\n'
+        ret += '\n---\n\n'
+
+        ret += "## Linguistic Distribution\n"
 
         for key in sorted(self.distribution.keys(), key=lambda k: len(self.distribution[k]), reverse=True):
             value = self.distribution[key]
             if len(value) > 0:
-                ret += f'{self.iso639_3_mappings[key]}: {round(100 * (len(value) / self.getDistinctCount()), 2)}%\n'
+                ret += f'### {self.iso639_3_mappings[key]}\n#### {round(100 * (len(value) / self.getDistinctCount()), 2)}%\n'
                 for word in self.getDistributionValues(key):
-                    ret += f'\t{word} - {self.wordcounts[word]}'
+                    ret += f'{word} - {self.wordcounts[word]}\n'
                     if len(self.getDistributionValues(key)) > 1:
                         ret += '\n'
                 ret += '\n\n'
@@ -87,8 +91,8 @@ if __name__ == '__main__':
         for item in data:
             iso639_3_mappings[item[0]] = item[1]
 
-    report = Report(distribution, wordset, wordcounts, iso639_3_mappings)
+    report = Report(filename, distribution, wordset, wordcounts, iso639_3_mappings)
     
-    reportFilePath = filename + '.report'
+    reportFilePath = filename + '_report.md'
     with open(reportFilePath, 'w') as file:
         file.write(str(report))
