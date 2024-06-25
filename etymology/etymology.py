@@ -13,26 +13,25 @@ class Report:
     def __repr__(self) -> str:
         ret = f'# Etymology Report for {filename}\n'
 
-        ret += '## Distribution Summary\n'
-
-        for key in sorted(distribution.keys(), key=lambda k: len(distribution[k]), reverse=True):
+        summary = '## Distribution Summary\n'
+        body = '## Linguistic Distribution\n'
+        for key in sorted(self.distribution.keys(), key=lambda k: len(self.distribution[k]), reverse=True):
             value = distribution[key]
             if len(value) > 0:
-                ret += f'### {iso639_3_mappings[key]}: {round(100 * (len(value) / self.getDistinctCount()), 2)}%\n'
+                heading = iso639_3_mappings[key].split('(', 1)[0].strip()
+                url = heading.replace(' ', '-')
+                summary += f'### [{heading}](#{url}): {round(100 * (len(value) / self.getDistinctCount()), 2)}%\n'
 
-        ret += '\n---\n\n'
-
-        ret += "## Linguistic Distribution\n"
-
-        for key in sorted(self.distribution.keys(), key=lambda k: len(self.distribution[k]), reverse=True):
-            value = self.distribution[key]
-            if len(value) > 0:
-                ret += f'### {self.iso639_3_mappings[key]}\n#### {round(100 * (len(value) / self.getDistinctCount()), 2)}%\n'
+                body += f'### {heading}\n#### {round(100 * (len(value) / self.getDistinctCount()), 2)}%\n'
                 for word in self.getDistributionValues(key):
-                    ret += f'{word} - {self.wordcounts[word]}\n'
+                    body += f'{word} - {self.wordcounts[word]}\n'
                     if len(self.getDistributionValues(key)) > 1:
-                        ret += '\n'
-                ret += '\n\n'
+                        body += '\n'
+                body += '\n\n'
+
+        ret += summary
+        ret += body
+
         return ret
     
     # return: the number of distinct words in the document, case insensitive
@@ -93,6 +92,6 @@ if __name__ == '__main__':
 
     report = Report(filename, distribution, wordset, wordcounts, iso639_3_mappings)
     
-    reportFilePath = filename + '_report.md'
+    reportFilePath = f'{filename.split(".")[0]}_report.md'
     with open(reportFilePath, 'w') as file:
         file.write(str(report))
