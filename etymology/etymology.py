@@ -5,13 +5,14 @@ import math
 
 class Report:
     def __init__(self, filename: str, distribution: dict, wordset: list, wordcounts: dict, iso639_3_mappings: dict):
+        self.filename = filename
         self.wordset = wordset
         self.distribution = distribution
         self.wordcounts = wordcounts
         self.iso639_3_mappings = iso639_3_mappings
 
     def __repr__(self) -> str:
-        ret = f'# Etymology Report for {filename}\n'
+        ret = f'# Etymology Report for {self.filename}\n'
 
         summary = '## Distribution Summary\n'
         body = '## Linguistic Distribution\n'
@@ -63,7 +64,8 @@ if __name__ == '__main__':
         abbrvs = sorted(set([x[2][:x[2].rfind(':')] for x in data]))
 
     with open(filename, 'r', encoding='utf8') as file:
-        words = [x.translate(str.maketrans('', '', string.punctuation.replace('\'', ''))).lower().strip() + '\n' for x in re.split('\s+', file.read()) if len(x.translate(str.maketrans('', '', string.punctuation.replace('\'', ''))).lower().strip()) > 2]
+        uncommented = re.sub('<!--.*-->', '', file.read())
+        words = [x.translate(str.maketrans('', '', string.punctuation.replace('\'', ''))).lower().strip() + '\n' for x in re.split('\s+', uncommented) if len(x.translate(str.maketrans('', '', string.punctuation.replace('\'', ''))).lower().strip()) > 2]
         for word in words:
             cleanWord = re.sub('\s', '', word)
             if cleanWord in wordcounts.keys():
