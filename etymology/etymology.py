@@ -63,24 +63,26 @@ if __name__ == '__main__':
         abbrvs = sorted(set([x[2][:x[2].rfind(':')] for x in data]))
 
     with open(filename, 'r', encoding='utf8') as file:
-        words = [x.translate(str.maketrans('', '', string.punctuation)).lower().strip() + '\n' for x in re.split('\W+', file.read()) if len(x.translate(str.maketrans('', '', string.punctuation)).lower().strip()) > 2]
+        words = [x.translate(str.maketrans('', '', string.punctuation.replace('\'', ''))).lower().strip() + '\n' for x in re.split('\s+', file.read()) if len(x.translate(str.maketrans('', '', string.punctuation.replace('\'', ''))).lower().strip()) > 2]
+        for word in words:
+            cleanWord = re.sub('\s', '', word)
+            if cleanWord in wordcounts.keys():
+                wordcounts[cleanWord] += 1
+            else:
+                wordcounts[cleanWord] = 1
         wordset = sorted(set([x for x in words if len(x.strip()) > 0]))
-
         print(f'{len(wordset)} unique words')
     
+    i = 1
     for item in data:
         word = item[0][item[0].rfind(':'):].lstrip(': ')
-        if word in wordcounts.keys():
-            wordcounts[word] += 1
-        else:
-            wordcounts[word] = 1
         etymologies[word] = item[2][:item[2].rfind(':')].strip()
 
     for abbrv in abbrvs:
         distribution[abbrv] = set()
 
     for word in wordset:
-        cleanWord = re.sub('\W', '', word)
+        cleanWord = re.sub('\s', '', word)
         if cleanWord in etymologies.keys() and etymologies[cleanWord] in distribution.keys():
             distribution[etymologies[cleanWord]].add(cleanWord)
     
