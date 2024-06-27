@@ -64,7 +64,7 @@ if __name__ == '__main__':
         abbrvs = sorted(set([x[2][:x[2].rfind(':')] for x in data]))
 
     with open(filename, 'r', encoding='utf8') as file:
-        uncommented = re.sub('<!--.*-->', '', file.read())
+        uncommented = re.sub('(?s)<!--.*-->', '', file.read(), 0, re.M)
         words = [x.translate(str.maketrans('', '', string.punctuation.replace('\'', ''))).lower().strip() + '\n' for x in re.split('\s+', uncommented) if len(x.translate(str.maketrans('', '', string.punctuation.replace('\'', ''))).lower().strip()) > 2]
         for word in words:
             cleanWord = re.sub('\s', '', word)
