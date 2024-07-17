@@ -116,7 +116,7 @@ if __name__ == '__main__':
     if len(args) < 1:
         debug("Missing argument 'input file'")
         sys.exit()
-    filename = "C:\\Users\\jarmy\\OneDrive\\Documents\\Story\\Part 1\\Hana I.md" #args[1]
+    filename = args[1]
     if len(filename) == 0: sys.exit()
     
     origins = []
@@ -174,15 +174,7 @@ if __name__ == '__main__':
     debug(f'{len(wordset)} unique words')
     
     etymologies = {}
-    # derivations = []
     distribution = {}
-    # for item in iso639_3_mappings:
-    #     word = item[item[0].rfind(':'):].lstrip(': ')
-    #     etymologies[word] = item[2][:item[2].rfind(':')].strip()
-
-    # for item in derivations:
-    #     word = item[0][item[0].rfind(':'):].lstrip(': ')
-    #     etymologies[word] = etymologies[item[2][:item[2].rfind(':')].strip()]
 
     for abbrv in ancestorLangs:
         distribution[abbrv] = set()
