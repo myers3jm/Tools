@@ -1,13 +1,24 @@
 # Publisher for markdown-based interactive media
-import sys
 import markdown
 import argparse
+import zipfile
+import os
+
+def compress(directory_path: str, output_path: str = None):
+    if output_path == None:
+        output_path = f'{os.path.dirname(os.path.normpath(directory_path))}\\Published.zip'
+    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, _, files in os.walk(directory_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                zipf.write(file_path, os.path.relpath(file_path, directory_path))
+        zipf.close()
 
 def html_prologue(title: str):
     return f'''
 <html>
     <head>
-        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="../style.css">
         <link rel="stylesheet" href="https://unpkg.com/simpledotcss/simple.min.css">
         <title>{title}</title>
     </head>
@@ -26,7 +37,7 @@ def html_epilogue(previous: str = None, next: str = None):
                     <td class="previous">
                         {previous_link}
                     </td>
-                    <td class="toc"><a href="index.html">Table of Contents</a></td>
+                    <td class="toc"><a href="../index.html">Table of Contents</a></td>
                     <td class="next">
                         {next_link}
                     </td>
@@ -44,7 +55,7 @@ def html_index(ordered_sources: list):
         <div>
 '''
     for source in ordered_sources:
-        ret += f'\t\t\t<p><a href="{source}.html">{source}</a></p>\n'
+        ret += f'\t\t\t<p><a href="./Chapters/{source}.html">{source}</a></p>\n'
     return ret
 
 CSS = '''
@@ -87,18 +98,22 @@ if __name__ == '__main__':
     source_args.add_argument('-f', '--file', help='Specify a single markdown source')
     source_args.add_argument('-d', '--directory', help='Specify a directory containing order.txt and multiple markdown sources')
     parser.add_argument('-o', '--output', help='Specify the output directory for the generated HTML pages', required=True)
+    parser.add_argument('-z', '--zip', help='Output files to a ZIP archive', action='store_true')
 
     args = parser.parse_args()
     path_to_sources = ''
     order_path = ''
     output_path = ''
-    if args.__contains__('file'):
+    zip = False
+    if args.file:
         path_to_sources = args.file
-    if args.__contains__('directory'):
+    if args.directory:
         path_to_sources = args.directory
         order_path = f'{path_to_sources}\\order.txt'
-    if args.__contains__('output'):
+    if args.output:
         output_path = f'{args.output}\\'
+    if args.zip:
+        zip = True
 
     # Get ordered sources
     ordered_sources = {}
@@ -113,6 +128,14 @@ if __name__ == '__main__':
         file.write(html_index(ordered_sources))
         file.write(html_epilogue())
         file.close()
+
+    # Write stylesheet
+    with open(f'{output_path}style.css', 'w') as file:
+        file.write(CSS)
+        file.close()
+    
+    # Modify output_path to store chapters in deeper directory
+    chapters_path = os.path.join(output_path, 'Chapters\\')
     
     # Act on each source file
     for title, source in ordered_sources.items():
@@ -129,13 +152,12 @@ if __name__ == '__main__':
         next = titles[current_index + 1] if current_index != len(titles) - 1 else ''
 
         # Write html file
-        with open(f'{output_path}{title}.html', 'w', encoding='utf8') as file:
+        with open(f'{chapters_path}{title}.html', 'w', encoding='utf8') as file:
             file.write(html_prologue(title))
             file.write(html)
             file.write(html_epilogue(previous, next))
             file.close()
     
-    # Write stylesheet
-    with open(f'{output_path}style.css', 'w') as file:
-        file.write(CSS)
-        file.close()
+    # Compress if requested
+    if zip:
+        compress(output_path)
